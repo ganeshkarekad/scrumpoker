@@ -152,18 +152,6 @@
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
     },
-    "symfony/mercure-bundle": {
-        "version": "0.3",
-        "recipe": {
-            "repo": "github.com/symfony/recipes",
-            "branch": "main",
-            "version": "0.3",
-            "ref": "528285147494380298f8f991ee8c47abebaf79db"
-        },
-        "files": [
-            "config/packages/mercure.yaml"
-        ]
-    },
     "symfony/messenger": {
         "version": "7.3",
         "recipe": {
@@ -288,14 +276,17 @@
             "ref": "0df5844274d871b37fc3816c57a768ffc60a43a5"
         }
     },
-    "symfony/ux-turbo": {
+    "symfony/ux-react": {
         "version": "2.27",
         "recipe": {
             "repo": "github.com/symfony/recipes",
             "branch": "main",
-            "version": "2.20",
-            "ref": "e4b951d7de760751e170c6d2e3b565cf9ed5182f"
-        }
+            "version": "2.9",
+            "ref": "e970076b31d602ae6e2106cf91a82c7e1f7ddff2"
+        },
+        "files": [
+            "assets/react/controllers/Hello.jsx"
+        ]
     },
     "symfony/validator": {
         "version": "7.3",

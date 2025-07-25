@@ -27,8 +27,15 @@ Encore
         '@symfony/stimulus-bridge/controllers.json': require.resolve('./assets/controllers.json')
     })
 
+
+
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
+
+    .enableReactPreset()
+
+    // enables the Symfony UX Stimulus bridge (used in assets/bootstrap.js)
+    .enableStimulusBridge('./assets/controllers.json')
 
     // will require an extra script tag for runtime.js
     // but, you probably want this, unless you're building a single-page app
@@ -70,8 +77,8 @@ Encore
         options.configFile = 'tsconfig.json';
     })
 
-    // uncomment if you use React
-    //.enableReactPreset()
+    // Enable React
+    .enableReactPreset()
 
     // uncomment to get integrity="..." attributes on your script & link tags
     // requires WebpackEncoreBundle 1.4 or higher

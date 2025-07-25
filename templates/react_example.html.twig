@@ -1,0 +1,8 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}React Example{% endblock %}
+
+{% block body %}
+    <div {{ react_component('Hello', { 'name': 'Symfony UX React' })|raw }}>
+    </div>
+{% endblock %}

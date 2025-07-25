@@ -13,5 +13,14 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import './styles/app.scss';
 
 // Import Stimulus controllers
-import './bootstrap.js';
+import { app } from './bootstrap.js';
+
+// Expose Stimulus app globally for debugging
+(window as any).Stimulus = app;
+
+// Import React components
+import { registerReactControllerComponents } from '@symfony/ux-react';
+registerReactControllerComponents(require.context('./react/controllers', true, /\.(j|t)sx?$/));
+
+
 
