@@ -1,3 +1,9 @@
+/* Custom styles for your application */
+/* Bootstrap is imported in app.js, so you can use Bootstrap classes and customize them here */
+
 body {
-    background-color: skyblue;
+    /* Remove the lightgray background to use Bootstrap's default */
+    /* background-color: lightgray; */
 }
+
+/* Add your custom styles here */
