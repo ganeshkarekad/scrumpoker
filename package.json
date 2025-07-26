@@ -29,6 +29,7 @@
         "build": "encore production --progress"
     },
     "dependencies": {
+        "@tanstack/react-query": "^5.83.0",
         "bootstrap": "5.3"
     }
 }
