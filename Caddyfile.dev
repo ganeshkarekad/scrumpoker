@@ -1,0 +1,37 @@
+{
+    # Debug mode for development
+    debug
+    # Disable admin API for security
+    admin off
+    # Disable automatic HTTPS for local development
+    auto_https off
+}
+
+# Mercure Hub configuration for local development
+:3000 {
+    # Enable CORS for local development
+    header {
+        Access-Control-Allow-Origin "*"
+        Access-Control-Allow-Methods "GET, POST, OPTIONS"
+        Access-Control-Allow-Headers "Authorization, Content-Type"
+    }
+
+    # Handle preflight requests
+    @options method OPTIONS
+    respond @options 200
+
+    # Mercure hub endpoint
+    mercure {
+        # Publisher JWT key (same as in .env)
+        publisher_jwt !ChangeThisMercureHubJWTSecretKey!
+        # Subscriber JWT key (same as in .env)
+        subscriber_jwt !ChangeThisMercureHubJWTSecretKey!
+        # Allow anonymous subscriptions for development
+        anonymous
+        # Enable CORS
+        cors_origins "*"
+    }
+
+    # Serve static files if needed
+    file_server
+}

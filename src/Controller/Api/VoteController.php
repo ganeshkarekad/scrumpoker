@@ -6,6 +6,7 @@ use App\Entity\UserVote;
 use App\Repository\RoomRepository;
 use App\Repository\UserRepository;
 use App\Repository\VoteRepository;
+use App\Service\MercurePublisher;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -37,7 +38,8 @@ class VoteController extends AbstractController
     public function toggleVisibility(
         Request $request,
         EntityManagerInterface $entityManager,
-        RoomRepository $roomRepository
+        RoomRepository $roomRepository,
+        MercurePublisher $mercurePublisher
     ): JsonResponse {
         // Get JSON data from request
         $data = json_decode($request->getContent(), true);
@@ -64,6 +66,9 @@ class VoteController extends AbstractController
 
         $entityManager->flush();
 
+        // Publish Mercure update for visibility toggle
+        $mercurePublisher->publishVisibilityToggle($roomKey, $room->getVotesVisible());
+
         return $this->json([
             'message' => 'Vote visibility toggled successfully',
             'roomKey' => $roomKey,
@@ -75,7 +80,8 @@ class VoteController extends AbstractController
     public function reset(
         Request $request,
         EntityManagerInterface $entityManager,
-        RoomRepository $roomRepository
+        RoomRepository $roomRepository,
+        MercurePublisher $mercurePublisher
     ): JsonResponse {
         // Get JSON data from request
         $data = json_decode($request->getContent(), true);
@@ -107,6 +113,9 @@ class VoteController extends AbstractController
 
         $entityManager->flush();
 
+        // Publish Mercure update for vote reset
+        $mercurePublisher->publishVoteReset($roomKey);
+
         return $this->json([
             'message' => 'All votes reset successfully',
             'roomKey' => $roomKey,
@@ -121,7 +130,8 @@ class VoteController extends AbstractController
         EntityManagerInterface $entityManager,
         RoomRepository $roomRepository,
         UserRepository $userRepository,
-        VoteRepository $voteRepository
+        VoteRepository $voteRepository,
+        MercurePublisher $mercurePublisher
     ): JsonResponse {
         // Get JSON data from request
         $data = json_decode($request->getContent(), true);
@@ -187,18 +197,22 @@ class VoteController extends AbstractController
 
             $entityManager->flush();
 
+            // Publish Mercure update for vote change
+            $voteData = [
+                'id' => $existingUserVote->getId(),
+                'roomKey' => $room->getRoomKey(),
+                'userId' => $user->getUserLoginId(),
+                'username' => $user->getUsername(),
+                'voteId' => $vote->getId(),
+                'voteLabel' => $vote->getLabel(),
+                'createdAt' => $existingUserVote->getCreatedAt()->format('Y-m-d H:i:s'),
+                'updatedAt' => $existingUserVote->getUpdatedAt()->format('Y-m-d H:i:s'),
+            ];
+            $mercurePublisher->publishVoteUpdate($roomKey, $voteData);
+
             return $this->json([
                 'message' => 'Vote updated successfully',
-                'userVote' => [
-                    'id' => $existingUserVote->getId(),
-                    'roomKey' => $room->getRoomKey(),
-                    'userId' => $user->getUserLoginId(),
-                    'username' => $user->getUsername(),
-                    'voteId' => $vote->getId(),
-                    'voteLabel' => $vote->getLabel(),
-                    'createdAt' => $existingUserVote->getCreatedAt()->format('Y-m-d H:i:s'),
-                    'updatedAt' => $existingUserVote->getUpdatedAt()->format('Y-m-d H:i:s'),
-                ]
+                'userVote' => $voteData
             ], Response::HTTP_OK);
         } else {
             // Create new vote
@@ -211,18 +225,22 @@ class VoteController extends AbstractController
             $entityManager->persist($userVote);
             $entityManager->flush();
 
+            // Publish Mercure update for new vote
+            $voteData = [
+                'id' => $userVote->getId(),
+                'roomKey' => $room->getRoomKey(),
+                'userId' => $user->getUserLoginId(),
+                'username' => $user->getUsername(),
+                'voteId' => $vote->getId(),
+                'voteLabel' => $vote->getLabel(),
+                'createdAt' => $userVote->getCreatedAt()->format('Y-m-d H:i:s'),
+                'updatedAt' => $userVote->getUpdatedAt()->format('Y-m-d H:i:s'),
+            ];
+            $mercurePublisher->publishVoteUpdate($roomKey, $voteData);
+
             return $this->json([
                 'message' => 'Vote added successfully',
-                'userVote' => [
-                    'id' => $userVote->getId(),
-                    'roomKey' => $room->getRoomKey(),
-                    'userId' => $user->getUserLoginId(),
-                    'username' => $user->getUsername(),
-                    'voteId' => $vote->getId(),
-                    'voteLabel' => $vote->getLabel(),
-                    'createdAt' => $userVote->getCreatedAt()->format('Y-m-d H:i:s'),
-                    'updatedAt' => $userVote->getUpdatedAt()->format('Y-m-d H:i:s'),
-                ]
+                'userVote' => $voteData
             ], Response::HTTP_CREATED);
         }
     }

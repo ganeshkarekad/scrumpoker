@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QueryProvider } from '../providers/QueryProvider';
 import { api, queryKeys, Vote, Participant } from '../services/api';
+import { useMercure } from '../hooks/useMercure';
 
 interface DashboardProps {
     roomKey: string;
@@ -9,31 +10,66 @@ interface DashboardProps {
 }
 
 function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
-    console.log(roomKey);
-    console.log(currentUserId);
+    console.log('Dashboard render - roomKey:', roomKey, 'currentUserId:', currentUserId);
 
     // State to store the selected vote
     const [selectedVote, setSelectedVote] = useState<Vote | null>(null);
 
     const queryClient = useQueryClient();
 
-    // Use TanStack Query to fetch votes with polling
+    // Use TanStack Query to fetch votes (no polling, just initial load)
     const { data: votes, isLoading: votesLoading, error: votesError } = useQuery({
         queryKey: queryKeys.votes(),
         queryFn: () => api.fetchVotes(),
-        refetchInterval: 5000, // Poll every 5 seconds for votes (less frequent since they change rarely)
-        refetchIntervalInBackground: true,
     });
 
-    // Use TanStack Query to fetch room data with polling
+    // Use TanStack Query to fetch room data (no polling, Mercure will handle updates)
     const { data: roomData, isLoading: roomLoading, error: roomError } = useQuery({
         queryKey: queryKeys.room(roomKey),
         queryFn: () => api.fetchRoom(roomKey),
         enabled: !!roomKey,
-        refetchInterval: roomError ? false : 1000, // Poll every 1 second, stop on error
-        refetchIntervalInBackground: true, // Continue polling when tab is not active
-        retry: 3, // Retry failed requests up to 3 times
-        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    });
+
+    // Create stable handler functions using useCallback
+    const handleVoteUpdate = useCallback((data: any) => {
+        console.log('Vote update received:', data);
+        // Invalidate room data to refetch with new vote
+        queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
+    }, [queryClient, roomKey]);
+
+    const handleVisibilityToggle = useCallback((data: any) => {
+        console.log('Visibility toggle received:', data);
+        // Invalidate room data to refetch with new visibility state
+        queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
+    }, [queryClient, roomKey]);
+
+    const handleVoteReset = useCallback((data: any) => {
+        console.log('Vote reset received:', data);
+        // Clear selected vote and invalidate room data
+        setSelectedVote(null);
+        queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
+    }, [queryClient, roomKey]);
+
+    const handleParticipantUpdate = useCallback((data: any) => {
+        console.log('Participant update received:', data);
+        // Invalidate room data to refetch with new participants
+        queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
+    }, [queryClient, roomKey]);
+
+    const handleRoomUpdate = useCallback((data: any) => {
+        console.log('Room update received:', data);
+        // Invalidate room data to refetch
+        queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
+    }, [queryClient, roomKey]);
+
+    // Use Mercure for real-time updates
+    const mercureState = useMercure({
+        roomKey,
+        onVoteUpdate: handleVoteUpdate,
+        onVisibilityToggle: handleVisibilityToggle,
+        onVoteReset: handleVoteReset,
+        onParticipantUpdate: handleParticipantUpdate,
+        onRoomUpdate: handleRoomUpdate,
     });
 
     // Use TanStack Query mutation for submitting votes
@@ -287,13 +323,19 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
                         <div className="card-header d-flex justify-content-between align-items-center">
                             <h5 className="mb-0">Participants ({roomData?.participants?.length || 0})</h5>
                             <div className="d-flex align-items-center">
-                                <span className="badge bg-success me-2">
+                                <span className={`badge me-2 ${
+                                    mercureState.isConnected ? 'bg-success' :
+                                    mercureState.connectionStatus === 'connecting' ? 'bg-warning' : 'bg-danger'
+                                }`}>
                                     <i className="fas fa-circle me-1" style={{ fontSize: '8px' }}></i>
-                                    Live
+                                    {mercureState.isConnected ? 'Live' :
+                                     mercureState.connectionStatus === 'connecting' ? 'Connecting' : 'Offline'}
                                 </span>
-                                {roomLoading && (
+                                {(roomLoading || mercureState.connectionStatus === 'connecting') && (
                                     <div className="spinner-border spinner-border-sm text-primary" role="status">
-                                        <span className="visually-hidden">Updating...</span>
+                                        <span className="visually-hidden">
+                                            {mercureState.connectionStatus === 'connecting' ? 'Connecting...' : 'Updating...'}
+                                        </span>
                                     </div>
                                 )}
                             </div>
