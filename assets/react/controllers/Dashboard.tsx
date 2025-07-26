@@ -147,16 +147,16 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
 
         if (participant.id === currentUserId) {
             labels.push(
-                <span key="you" className="badge bg-primary ms-2">
-                    You
+                <span key="you" className="status-badge badge bg-primary">
+                    👤 You
                 </span>
             );
         }
 
         if (participant.isCreator) {
             labels.push(
-                <span key="host" className="badge bg-success ms-2">
-                    Host
+                <span key="host" className="status-badge badge bg-success">
+                    👑 Host
                 </span>
             );
         }
@@ -168,8 +168,8 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
         // If votes are hidden (based on room state), show "Hidden" for all participants
         if (!roomData?.votesVisible) {
             return (
-                <span className="badge bg-warning">
-                    Hidden
+                <span className="status-badge badge bg-warning">
+                    🙈 Hidden
                 </span>
             );
         }
@@ -177,28 +177,32 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
         // If participant has voted, show their vote
         if (participant.vote) {
             return (
-                <span className={`badge ${participant.id === currentUserId ? 'bg-primary' : 'bg-success'}`}>
-                    {participant.vote.label}
+                <span className={`status-badge badge ${participant.id === currentUserId ? 'bg-primary' : 'bg-success'}`}>
+                    ✅ {participant.vote.label}
                 </span>
             );
         }
 
         // If no vote, show "No Vote"
         return (
-            <span className="badge bg-secondary">
-                No Vote
+            <span className="status-badge badge bg-secondary">
+                ⏳ No Vote
             </span>
         );
     };
 
     if (votesLoading || roomLoading) {
         return (
-            <div className="container-fluid">
-                <div className="d-flex align-items-center justify-content-center p-4">
-                    <div className="spinner-border spinner-border-sm me-2" role="status">
-                        <span className="visually-hidden">Loading...</span>
+            <div className="dashboard-container">
+                <div className="container-fluid py-4">
+                    <div className="loading-container">
+                        <div className="d-flex align-items-center justify-content-center">
+                            <div className="spinner-border spinner-border-sm me-3" role="status">
+                                <span className="visually-hidden">Loading...</span>
+                            </div>
+                            <span className="fs-5 fw-medium">Loading your poker session...</span>
+                        </div>
                     </div>
-                    Loading...
                 </div>
             </div>
         );
@@ -206,31 +210,37 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
 
     if (votesError || roomError) {
         return (
-            <div className="container-fluid">
-                <div className="alert alert-danger">
-                    <p>Error loading data: {(votesError || roomError) instanceof Error ? (votesError || roomError)?.message : 'Unknown error'}</p>
+            <div className="dashboard-container">
+                <div className="container-fluid py-4">
+                    <div className="alert alert-danger">
+                        <h5 className="alert-heading">
+                            ⚠️ Oops! Something went wrong
+                        </h5>
+                        <p className="mb-0">Error loading data: {(votesError || roomError) instanceof Error ? (votesError || roomError)?.message : 'Unknown error'}</p>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="container-fluid">
-            {/* Vote Buttons Section */}
-            <div className="row">
-                <div className="col-12">
-                    <div className="d-flex flex-wrap gap-2 justify-content-center p-3">
+        <div className="dashboard-container">
+            <div className="container-fluid py-4">
+                {/* Vote Buttons Section */}
+                <div className="vote-buttons-section">
+                    <div className="text-center mb-4">
+                        <h3 className="fw-bold mb-2">Choose Your Estimate</h3>
+                        <p className="text-muted mb-0">Select a card to cast your vote</p>
+                    </div>
+                    <div className="d-flex flex-wrap gap-3 justify-content-center">
                         {votes?.map((vote) => (
                             <button
                                 key={vote.id}
-                                className={`btn btn-lg ${
-                                    selectedVote?.id === vote.id
-                                        ? 'btn-primary'
-                                        : 'btn-outline-primary'
+                                className={`vote-button ${
+                                    selectedVote?.id === vote.id ? 'selected' : ''
                                 }`}
                                 onClick={() => handleVoteClick(vote)}
                                 disabled={submitVoteMutation.isPending}
-                                style={{ minWidth: '60px', minHeight: '60px' }}
                             >
                                 {submitVoteMutation.isPending && selectedVote?.id === vote.id ? (
                                     <div className="spinner-border spinner-border-sm" role="status">
@@ -243,14 +253,16 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
                         ))}
                     </div>
                 </div>
-            </div>
 
-            {/* Control Buttons */}
-            <div className="row mt-3">
-                <div className="col-12">
-                    <div className="d-flex justify-content-center gap-3">
+                {/* Control Buttons */}
+                <div className="control-buttons-section">
+                    <div className="text-center mb-3">
+                        <h5 className="fw-semibold mb-1">Session Controls</h5>
+                        <p className="text-muted small mb-0">Manage vote visibility and reset the session</p>
+                    </div>
+                    <div className="d-flex justify-content-center gap-3 flex-wrap">
                         <button
-                            className={`btn btn-lg ${roomData?.votesVisible ? 'btn-warning' : 'btn-outline-warning'}`}
+                            className={`control-button btn btn-lg ${roomData?.votesVisible ? 'btn-warning' : 'btn-outline-warning'}`}
                             onClick={handleShowHideClick}
                             disabled={submitVoteMutation.isPending || resetVotesMutation.isPending || toggleVisibilityMutation.isPending}
                         >
@@ -262,11 +274,13 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
                                     Toggling...
                                 </>
                             ) : (
-                                roomData?.votesVisible ? 'Hide Votes' : 'Show Votes'
+                                <>
+                                    {roomData?.votesVisible ? '🙈 Hide Votes' : '👁️ Show Votes'}
+                                </>
                             )}
                         </button>
                         <button
-                            className="btn btn-danger btn-lg"
+                            className="control-button btn btn-danger btn-lg"
                             onClick={handleResetClick}
                             disabled={submitVoteMutation.isPending || resetVotesMutation.isPending || toggleVisibilityMutation.isPending}
                         >
@@ -278,94 +292,107 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
                                     Resetting...
                                 </>
                             ) : (
-                                'Reset Votes'
+                                <>
+                                    🔄 Reset Votes
+                                </>
                             )}
                         </button>
                     </div>
                 </div>
-            </div>
 
-            {/* Error/Success Messages */}
-            {(submitVoteMutation.isError || resetVotesMutation.isError || toggleVisibilityMutation.isError) && (
-                <div className="row mt-2">
-                    <div className="col-12">
-                        <div className="alert alert-danger">
-                            {submitVoteMutation.isError && (
-                                <>Error submitting vote: {submitVoteMutation.error instanceof Error ? submitVoteMutation.error.message : 'Unknown error'}</>
-                            )}
-                            {resetVotesMutation.isError && (
-                                <>Error resetting votes: {resetVotesMutation.error instanceof Error ? resetVotesMutation.error.message : 'Unknown error'}</>
-                            )}
-                            {toggleVisibilityMutation.isError && (
-                                <>Error toggling vote visibility: {toggleVisibilityMutation.error instanceof Error ? toggleVisibilityMutation.error.message : 'Unknown error'}</>
+                {/* Error/Success Messages */}
+                {(submitVoteMutation.isError || resetVotesMutation.isError || toggleVisibilityMutation.isError) && (
+                    <div className="alert alert-danger">
+                        <h6 className="alert-heading">
+                            ❌ Action Failed
+                        </h6>
+                        {submitVoteMutation.isError && (
+                            <p className="mb-0">Error submitting vote: {submitVoteMutation.error instanceof Error ? submitVoteMutation.error.message : 'Unknown error'}</p>
+                        )}
+                        {resetVotesMutation.isError && (
+                            <p className="mb-0">Error resetting votes: {resetVotesMutation.error instanceof Error ? resetVotesMutation.error.message : 'Unknown error'}</p>
+                        )}
+                        {toggleVisibilityMutation.isError && (
+                            <p className="mb-0">Error toggling vote visibility: {toggleVisibilityMutation.error instanceof Error ? toggleVisibilityMutation.error.message : 'Unknown error'}</p>
+                        )}
+                    </div>
+                )}
+
+                {(submitVoteMutation.isSuccess || resetVotesMutation.isSuccess || toggleVisibilityMutation.isSuccess) && (
+                    <div className="alert alert-success">
+                        <h6 className="alert-heading">
+                            ✅ Success!
+                        </h6>
+                        {submitVoteMutation.isSuccess && <p className="mb-0">Vote submitted successfully!</p>}
+                        {resetVotesMutation.isSuccess && <p className="mb-0">All votes reset successfully!</p>}
+                        {toggleVisibilityMutation.isSuccess && <p className="mb-0">Vote visibility toggled successfully!</p>}
+                    </div>
+                )}
+
+                {/* Participants Table Section */}
+                <div className="participants-section">
+                    <div className="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 className="mb-1">
+                                👥 Participants ({roomData?.participants?.length || 0})
+                            </h5>
+                            <small className="opacity-75">Real-time participant status and votes</small>
+                        </div>
+                        <div className="d-flex align-items-center">
+                            <span className={`status-badge badge me-2 ${
+                                mercureState.isConnected ? 'bg-success' :
+                                mercureState.connectionStatus === 'connecting' ? 'bg-warning' : 'bg-danger'
+                            }`}>
+                                🟢 {mercureState.isConnected ? 'Live' :
+                                 mercureState.connectionStatus === 'connecting' ? 'Connecting' : 'Offline'}
+                            </span>
+                            {(roomLoading || mercureState.connectionStatus === 'connecting') && (
+                                <div className="spinner-border spinner-border-sm text-white" role="status">
+                                    <span className="visually-hidden">
+                                        {mercureState.connectionStatus === 'connecting' ? 'Connecting...' : 'Updating...'}
+                                    </span>
+                                </div>
                             )}
                         </div>
                     </div>
-                </div>
-            )}
-
-            {(submitVoteMutation.isSuccess || resetVotesMutation.isSuccess || toggleVisibilityMutation.isSuccess) && (
-                <div className="row mt-2">
-                    <div className="col-12">
-                        <div className="alert alert-success">
-                            {submitVoteMutation.isSuccess && 'Vote submitted successfully!'}
-                            {resetVotesMutation.isSuccess && 'All votes reset successfully!'}
-                            {toggleVisibilityMutation.isSuccess && 'Vote visibility toggled successfully!'}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Participants Table Section */}
-            <div className="row mt-4">
-                <div className="col-12">
-                    <div className="card">
-                        <div className="card-header d-flex justify-content-between align-items-center">
-                            <h5 className="mb-0">Participants ({roomData?.participants?.length || 0})</h5>
-                            <div className="d-flex align-items-center">
-                                <span className={`badge me-2 ${
-                                    mercureState.isConnected ? 'bg-success' :
-                                    mercureState.connectionStatus === 'connecting' ? 'bg-warning' : 'bg-danger'
-                                }`}>
-                                    <i className="fas fa-circle me-1" style={{ fontSize: '8px' }}></i>
-                                    {mercureState.isConnected ? 'Live' :
-                                     mercureState.connectionStatus === 'connecting' ? 'Connecting' : 'Offline'}
-                                </span>
-                                {(roomLoading || mercureState.connectionStatus === 'connecting') && (
-                                    <div className="spinner-border spinner-border-sm text-primary" role="status">
-                                        <span className="visually-hidden">
-                                            {mercureState.connectionStatus === 'connecting' ? 'Connecting...' : 'Updating...'}
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                        <div className="card-body p-0">
-                            <div className="table-responsive">
-                                <table className="table table-hover mb-0">
-                                    <thead className="table-light">
-                                        <tr>
-                                            <th scope="col">#</th>
-                                            <th scope="col">Username</th>
-                                            <th scope="col">Vote</th>
+                    <div className="card-body p-0">
+                        <div className="table-responsive">
+                            <table className="table table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col" className="text-center" style={{ width: '60px' }}>#</th>
+                                        <th scope="col">
+                                            👤 Participant
+                                        </th>
+                                        <th scope="col" className="text-center">
+                                            🗳️ Vote Status
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {roomData?.participants?.map((participant, index) => (
+                                        <tr key={participant.id}>
+                                            <td className="text-center fw-semibold text-muted">{index + 1}</td>
+                                            <td>
+                                                <div className="d-flex align-items-center">
+                                                    <div className="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3">
+                                                        {participant.username.charAt(0).toUpperCase()}
+                                                    </div>
+                                                    <div>
+                                                        <div className="fw-semibold">{participant.username}</div>
+                                                        <div className="d-flex gap-1 mt-1">
+                                                            {renderParticipantLabels(participant)}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="text-center">
+                                                {renderParticipantVote(participant)}
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {roomData?.participants?.map((participant, index) => (
-                                            <tr key={participant.id}>
-                                                <th scope="row">{index + 1}</th>
-                                                <td>
-                                                    {participant.username}
-                                                    {renderParticipantLabels(participant)}
-                                                </td>
-                                                <td>
-                                                    {renderParticipantVote(participant)}
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
