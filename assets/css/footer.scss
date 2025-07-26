@@ -1,0 +1,81 @@
+// Footer component styles
+.footer {
+    background: linear-gradient(135deg, var(--bs-dark) 0%, #1E293B 100%);
+    color: var(--bs-light);
+    padding: 2rem 0;
+    margin-top: auto;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+
+    &__content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+
+        @media (max-width: 768px) {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+        }
+    }
+
+    &__copyright {
+        color: var(--bs-secondary);
+        font-size: 0.875rem;
+        margin: 0;
+
+        .site-name {
+            color: var(--bs-light);
+            font-weight: 500;
+        }
+    }
+
+    &__donation {
+        .donation-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #FF5F5F 0%, #FF8E53 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--bs-border-radius);
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(255, 95, 95, 0.3);
+
+            &:hover {
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 16px rgba(255, 95, 95, 0.4);
+            }
+
+            &:focus {
+                color: white;
+                outline: 2px solid rgba(255, 95, 95, 0.5);
+                outline-offset: 2px;
+            }
+
+            .donation-icon {
+                font-size: 1rem;
+            }
+        }
+    }
+}
+
+// Ensure body has flex layout for sticky footer
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+// Main content should grow to push footer down
+.main-content {
+    flex: 1;
+}

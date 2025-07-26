@@ -17,6 +17,14 @@ class UserRepository extends ServiceEntityRepository
     }
 
     /**
+     * Find user by userLoginId
+     */
+    public function findByUserLoginId(string $userLoginId): ?User
+    {
+        return $this->findOneBy(['userLoginId' => $userLoginId]);
+    }
+
+    /**
      * Find user by username
      */
     public function findByUsername(string $username): ?User

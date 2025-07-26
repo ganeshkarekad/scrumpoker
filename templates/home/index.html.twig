@@ -1,7 +1,5 @@
 {% extends 'page.html.twig' %}
 
-{% form_theme form 'bootstrap_5_horizontal_layout.html.twig' %}
-
 {% block title %}Welcome to Scrum Poker!{% endblock %}
 
 {% block meta_description %}
@@ -47,9 +45,14 @@
                                             <div class="action-card__icon">🚀</div>
                                             <h3 class="action-card__title">Start Fresh</h3>
                                             <p class="action-card__description">Create a new estimation session</p>
-                                            <button class="btn btn-primary btn-lg action-card__btn" data-action="click->homepage-animations#createRoom">
-                                                Create New Room
-                                            </button>
+                                            {{ form_start(userForm, {'attr': {'class': 'action-card__form'}}) }}
+                                            <div class="join-form__group">
+                                                {{ form_widget(userForm.username, {'attr': {'placeholder': 'Enter your name', 'class': 'form-control join-form__input'}}) }}
+                                                <button type="submit" class="btn btn-primary btn-lg action-card__btn">
+                                                    Create Room
+                                                </button>
+                                            </div>
+                                            {{ form_end(userForm) }}
                                         </div>
                                     </div>
 
@@ -60,10 +63,12 @@
                                             <p class="action-card__description">Enter an existing room</p>
                                             {{ form_start(form, {'attr': {'class': 'action-card__form'}}) }}
                                             <div class="join-form__group">
-                                                {{ form_widget(form.roomKey, {'attr': {'placeholder': 'Room code', 'class': 'form-control join-form__input'}}) }}
+                                                {{ form_widget(form.username, {'attr': {'placeholder': 'Enter your name', 'class': 'form-control join-form__input mb-2'}}) }}
+                                                {{ form_widget(form.roomKey, {'attr': {'placeholder': 'Enter room code', 'class': 'form-control join-form__input'}}) }}
                                                 <button type="submit" class="btn btn-outline-primary btn-lg action-card__btn">
                                                     Join Room
                                                 </button>
+
                                             </div>
                                             {{ form_end(form) }}
                                         </div>
@@ -117,25 +122,34 @@
                 </div>
             </div>
             <div class="row g-4">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="feature-card" data-homepage-animations-target="featureCard">
-                        <div class="feature-card__icon">⚡</div>
-                        <h3 class="feature-card__title">Lightning Fast</h3>
+                        <div class="feature-card__icon">💰</div>
+                        <h3 class="feature-card__title">Free</h3>
                         <p class="feature-card__description">
-                            Real-time voting with instant results. No waiting, no delays.
+                            No subscription fees, no hidden costs. Completely free to use forever.
                         </p>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <div class="feature-card" data-homepage-animations-target="featureCard">
+                        <div class="feature-card__icon">🚫</div>
+                        <h3 class="feature-card__title">No Sign Ups</h3>
+                        <p class="feature-card__description">
+                            Jump right in without creating accounts or providing personal information.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-3">
                     <div class="feature-card" data-homepage-animations-target="featureCard">
                         <div class="feature-card__icon">🎯</div>
-                        <h3 class="feature-card__title">Accurate Estimates</h3>
+                        <h3 class="feature-card__title">No Ads</h3>
                         <p class="feature-card__description">
-                            Fibonacci sequence and custom scales for precise story pointing.
+                            Clean, distraction-free interface focused on your team's productivity.
                         </p>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="feature-card" data-homepage-animations-target="featureCard">
                         <div class="feature-card__icon">👥</div>
                         <h3 class="feature-card__title">Team Collaboration</h3>
@@ -189,4 +203,8 @@
         </div>
     </section>
 </div>
+
+
+{% include 'partials/footer.html.twig' %}
+
 {% endblock %}

@@ -1,20 +1,54 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello RoomController!{% endblock %}
+{% block title %}Room {{ room.roomKey }} - {{ constant('App\\Constant\\Site::NAME') }}{% endblock %}
 
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1">Scrum Poker Room</h1>
+                    <p class="text-muted mb-0">Room Code: <strong>{{ room.roomKey }}</strong></p>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-muted">Welcome, <strong>{{ user.username }}</strong></span>
+                </div>
+            </div>
 
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Users/ganeshkarekad/PhpstormProjects/scrumpoker/src/Controller/RoomController.php</code></li>
-        <li>Your template at <code>/Users/ganeshkarekad/PhpstormProjects/scrumpoker/templates/room/index.html.twig</code></li>
-    </ul>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Voting Area</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Voting functionality will be implemented here.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Participants ({{ room.users|length }})</h5>
+                        </div>
+                        <div class="card-body">
+                            {% for participant in room.users %}
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="avatar-sm bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2">
+                                        {{ participant.username|first|upper }}
+                                    </div>
+                                    <span>{{ participant.username }}</span>
+                                    {% if participant == room.createdBy %}
+                                        <span class="badge bg-success ms-2">Host</span>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -6,14 +6,15 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+
+use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: \App\Repository\UserRepository::class)]
 #[ORM\Table(name: 'users')]
 #[ORM\Index(columns: ['username'], name: 'idx_user_username')]
 #[ORM\Index(columns: ['created_at'], name: 'idx_user_created_at')]
-#[UniqueEntity(fields: ['username'], message: 'This username is already taken.')]
+#[ORM\Index(columns: ['user_login_id'], name: 'idx_user_login_id')]
 class User
 {
     #[ORM\Id]
@@ -21,7 +22,11 @@ class User
     #[ORM\Column(type: 'integer')]
     private ?int $id = null;
 
-    #[ORM\Column(type: 'string', length: 180, unique: true)]
+    #[ORM\Column(type: 'string', length: 36, unique: true)]
+    #[Assert\NotBlank]
+    private ?string $userLoginId = null;
+
+    #[ORM\Column(type: 'string', length: 180)]
     #[Assert\NotBlank]
     #[Assert\Length(min: 2, max: 180)]
     private ?string $username = null;
@@ -55,6 +60,7 @@ class User
 
     public function __construct()
     {
+        $this->userLoginId = Uuid::v4()->toRfc4122();
         $this->createdAt = new \DateTimeImmutable();
         $this->userRooms = new ArrayCollection();
         $this->createdRooms = new ArrayCollection();
@@ -67,6 +73,17 @@ class User
         return $this->id;
     }
 
+    public function getUserLoginId(): ?string
+    {
+        return $this->userLoginId;
+    }
+
+    public function setUserLoginId(string $userLoginId): static
+    {
+        $this->userLoginId = $userLoginId;
+        return $this;
+    }
+
     public function getUsername(): ?string
     {
         return $this->username;
@@ -77,6 +94,8 @@ class User
         $this->username = $username;
         return $this;
     }
+
+
 
     public function getCreatedAt(): ?\DateTimeImmutable
     {
@@ -210,4 +229,6 @@ class User
     {
         return $this->username ?? '';
     }
+
+
 }

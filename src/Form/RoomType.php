@@ -16,14 +16,25 @@ class RoomType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('username', TextType::class, [
+                'label' => 'Your Name',
+                'mapped' => false,
+                'attr' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'Enter your name',
+                    'minlength' => 2,
+                    'maxlength' => 180,
+                    'value' => ''
+                ]
+            ])
             ->add('roomKey', TextType::class, [
                 'label' => 'Room Key',
                 'attr' => [
                     'class' => 'form-control',
-                    'placeholder' => 'Enter pass code',
-                    'minlength' => 4,
-                    'maxlength' => 22,
-                    'pattern' => '[-_a-zA-Z0-9]{4,22}',
+                    'placeholder' => 'Enter room key',
+                    'minlength' => 36,
+                    'maxlength' => 36,
+                    'pattern' => '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
                     'value' => ''
                 ]
             ])
