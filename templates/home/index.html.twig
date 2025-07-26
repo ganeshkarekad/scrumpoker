@@ -1,7 +1,23 @@
-{% extends 'base.html.twig' %}
+{% extends 'page.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
+{% form_theme form 'bootstrap_5_horizontal_layout.html.twig' %}
 
-{% block body %}
+{% block title %}Welcome!{% endblock %}
 
+{% block meta_description %}
+    {{ constant('App\\Constant\\Site::DESCRIPTION') }}
+{% endblock %}
+
+{% block content %}
+    <div class="d-flex justify-content-center align-items-center text-center">
+        <div class="col">
+            <button class="btn btn-primary">Create a new room</button>
+        </div>
+        <div class="col">
+            {{ form_start(form) }}
+
+            {{ form_end(form) }}
+
+        </div>
+    </div>
 {% endblock %}
