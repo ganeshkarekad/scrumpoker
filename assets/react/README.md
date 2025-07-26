@@ -88,13 +88,42 @@ const updateStatusMutation = useMutation({
 - **Response**: Returns vote confirmation with timestamps
 - **Usage**: Used when user clicks on vote buttons
 
+### Vote Visibility Toggle
+- **Endpoint**: `POST /api/vote/toggle-visibility`
+- **Description**: Toggles vote visibility for all users in a room (synchronized state)
+- **Request Body**: `{ "roomKey": string }`
+- **Response**: Returns new visibility state
+- **Usage**: Used by Show/Hide Votes button
+
+### Vote Reset
+- **Endpoint**: `POST /api/vote/reset`
+- **Description**: Resets all votes in a room and hides them
+- **Request Body**: `{ "roomKey": string }`
+- **Response**: Returns reset confirmation with count
+- **Usage**: Used by Reset Votes button
+
+## Real-time Features
+
+### Polling Implementation
+- **Room Data**: Polls every 1 second for real-time participant and vote updates
+- **Vote Options**: Polls every 5 seconds for available vote options
+- **Background Polling**: Continues polling even when browser tab is not active
+- **Error Handling**: Stops polling on errors to prevent spam, with exponential backoff retry
+- **Visual Indicators**: Shows "Live" badge and loading spinner during updates
+
+### Synchronization
+- **Vote Visibility**: Show/Hide state is synchronized across all users
+- **Vote Data**: All participants' votes are displayed in real-time
+- **Reset Functionality**: Vote resets are immediately visible to all users
+
 ## Next Steps
 
-1. ✅ ~~Replace simulated API calls with real Symfony API endpoints~~ (Completed for room participants)
-2. Add more query hooks for different data types (votes, user votes, etc.)
-3. Implement optimistic updates for better UX
-4. Add React Query DevTools for development
-5. Consider adding infinite queries for paginated data
+1. ✅ ~~Replace simulated API calls with real Symfony API endpoints~~ (Completed)
+2. ✅ ~~Implement real-time polling for synchronized state~~ (Completed)
+3. Add WebSocket support for even faster real-time updates (optional)
+4. Implement optimistic updates for better UX
+5. Add React Query DevTools for development
+6. Consider adding infinite queries for paginated data
 
 ## TanStack Query Documentation
 
