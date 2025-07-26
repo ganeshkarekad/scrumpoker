@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QueryProvider } from '../providers/QueryProvider';
 import { api, queryKeys, Vote, Participant } from '../services/api';
 import { useMercure } from '../hooks/useMercure';
+import { VoteChart } from '../components/VoteChart';
 
 interface DashboardProps {
     roomKey: string;
@@ -299,6 +300,14 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
                         </button>
                     </div>
                 </div>
+
+                {/* Vote Chart - Only show when votes are visible and there are participants */}
+                {roomData?.votesVisible && roomData?.participants && (
+                    <VoteChart
+                        participants={roomData.participants}
+                        isVisible={roomData.votesVisible}
+                    />
+                )}
 
                 {/* Error/Success Messages */}
                 {(submitVoteMutation.isError || resetVotesMutation.isError || toggleVisibilityMutation.isError) && (
