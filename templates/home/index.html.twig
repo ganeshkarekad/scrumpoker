@@ -2,22 +2,191 @@
 
 {% form_theme form 'bootstrap_5_horizontal_layout.html.twig' %}
 
-{% block title %}Welcome!{% endblock %}
+{% block title %}Welcome to Scrum Poker!{% endblock %}
 
 {% block meta_description %}
     {{ constant('App\\Constant\\Site::DESCRIPTION') }}
 {% endblock %}
 
-{% block content %}
-    <div class="d-flex justify-content-center align-items-center text-center">
-        <div class="col">
-            <button class="btn btn-primary">Create a new room</button>
+{% block body %}
+<div class="homepage" data-controller="homepage-animations">
+    <!-- Animated Background Elements -->
+    <div class="homepage__background">
+        <div class="floating-shapes">
+            <div class="shape shape--circle shape--1"></div>
+            <div class="shape shape--triangle shape--2"></div>
+            <div class="shape shape--square shape--3"></div>
+            <div class="shape shape--circle shape--4"></div>
+            <div class="shape shape--triangle shape--5"></div>
         </div>
-        <div class="col">
-            {{ form_start(form) }}
-
-            {{ form_end(form) }}
-
-        </div>
+        <div class="gradient-overlay"></div>
     </div>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <!-- Left Column: Content and Actions -->
+                <div class="col-lg-7">
+                    <div class="hero__content">
+                        <h1 class="hero__title">
+                            <span class="hero__title-line" data-homepage-animations-target="typingText">Make Planning Poker</span>
+                            <span class="hero__title-line hero__title-line--accent">Fun & Efficient</span>
+                        </h1>
+                        <p class="hero__subtitle">
+                            Streamline your agile estimation process with our modern,
+                            real-time Scrum Poker platform. Get your team aligned faster than ever.
+                        </p>
+
+                        <!-- Action Cards - Immediately Visible -->
+                        <div class="hero__actions">
+                            <div class="action-cards-container">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="action-card action-card--create action-card--compact" data-homepage-animations-target="actionCard">
+                                            <div class="action-card__icon">🚀</div>
+                                            <h3 class="action-card__title">Start Fresh</h3>
+                                            <p class="action-card__description">Create a new estimation session</p>
+                                            <button class="btn btn-primary btn-lg action-card__btn" data-action="click->homepage-animations#createRoom">
+                                                Create New Room
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="action-card action-card--join action-card--compact" data-homepage-animations-target="actionCard">
+                                            <div class="action-card__icon">🔗</div>
+                                            <h3 class="action-card__title">Join Team</h3>
+                                            <p class="action-card__description">Enter an existing room</p>
+                                            {{ form_start(form, {'attr': {'class': 'action-card__form'}}) }}
+                                            <div class="join-form__group">
+                                                {{ form_widget(form.roomKey, {'attr': {'placeholder': 'Room code', 'class': 'form-control join-form__input'}}) }}
+                                                <button type="submit" class="btn btn-outline-primary btn-lg action-card__btn">
+                                                    Join Room
+                                                </button>
+                                            </div>
+                                            {{ form_end(form) }}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="action-cards__divider">
+                                    <span class="divider-text">or</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Illustration -->
+                <div class="col-lg-5">
+                    <div class="hero__illustration">
+                        <div class="poker-cards">
+                            <div class="poker-card poker-card--1" data-homepage-animations-target="card">
+                                <span class="poker-card__value">1</span>
+                            </div>
+                            <div class="poker-card poker-card--2" data-homepage-animations-target="card">
+                                <span class="poker-card__value">3</span>
+                            </div>
+                            <div class="poker-card poker-card--3" data-homepage-animations-target="card">
+                                <span class="poker-card__value">5</span>
+                            </div>
+                            <div class="poker-card poker-card--4" data-homepage-animations-target="card">
+                                <span class="poker-card__value">8</span>
+                            </div>
+                        </div>
+                        <div class="team-avatars">
+                            <div class="avatar avatar--1">👨‍💻</div>
+                            <div class="avatar avatar--2">👩‍💼</div>
+                            <div class="avatar avatar--3">👨‍🎨</div>
+                            <div class="avatar avatar--4">👩‍🔬</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="features__title">Why Choose Our Scrum Poker?</h2>
+                    <p class="features__subtitle">Everything you need for effective agile estimation</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="feature-card" data-homepage-animations-target="featureCard">
+                        <div class="feature-card__icon">⚡</div>
+                        <h3 class="feature-card__title">Lightning Fast</h3>
+                        <p class="feature-card__description">
+                            Real-time voting with instant results. No waiting, no delays.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card" data-homepage-animations-target="featureCard">
+                        <div class="feature-card__icon">🎯</div>
+                        <h3 class="feature-card__title">Accurate Estimates</h3>
+                        <p class="feature-card__description">
+                            Fibonacci sequence and custom scales for precise story pointing.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="feature-card" data-homepage-animations-target="featureCard">
+                        <div class="feature-card__icon">👥</div>
+                        <h3 class="feature-card__title">Team Collaboration</h3>
+                        <p class="feature-card__description">
+                            Bring your entire team together for better estimation consensus.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="how-it-works">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-5">
+                    <h2 class="how-it-works__title">How It Works</h2>
+                    <p class="how-it-works__subtitle">Get started in three simple steps</p>
+                </div>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="step-card" data-homepage-animations-target="stepCard">
+                        <div class="step-card__number">1</div>
+                        <h3 class="step-card__title">Create Room</h3>
+                        <p class="step-card__description">
+                            Start a new estimation session and invite your team members.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="step-card" data-homepage-animations-target="stepCard">
+                        <div class="step-card__number">2</div>
+                        <h3 class="step-card__title">Vote Together</h3>
+                        <p class="step-card__description">
+                            Everyone selects their estimate simultaneously and privately.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="step-card" data-homepage-animations-target="stepCard">
+                        <div class="step-card__number">3</div>
+                        <h3 class="step-card__title">Reveal & Discuss</h3>
+                        <p class="step-card__description">
+                            See all votes at once and discuss any differences to reach consensus.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
 {% endblock %}

@@ -27,11 +27,6 @@ class RoomType extends AbstractType
                     'value' => ''
                 ]
             ])
-            ->add('joinRoom', SubmitType::class, [
-                'attr' => [
-                    'class' => 'btn btn-primary'
-                ]
-            ])
         ;
     }
 

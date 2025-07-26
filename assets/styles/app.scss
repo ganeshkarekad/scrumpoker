@@ -3,6 +3,9 @@
 // Import Bootstrap
 @import "bootstrap";
 
+// Import Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
 :root {
     /* Primary colors */
     --bs-primary: #3B82F6;
@@ -33,3 +36,13 @@
     --bs-border-radius-sm: 0.375rem;
     --bs-border-radius-lg: 1rem;
 }
+
+// Global styles
+body {
+    font-family: var(--bs-font-sans-serif);
+    line-height: 1.6;
+    color: var(--bs-body-color);
+}
+
+// Import component styles
+@import "../css/homepage.scss";
