@@ -23,13 +23,21 @@ class RoomController extends AbstractController
             ], Response::HTTP_NOT_FOUND);
         }
 
-        // Get all participants (users) in the room
+        // Get all participants (users) in the room with their votes
         $participants = [];
         foreach ($room->getUsers() as $user) {
+            $userVote = $room->getUserVote($user);
+
             $participants[] = [
                 'id' => $user->getUserLoginId(),
                 'username' => $user->getUsername(),
                 'isCreator' => $room->getCreatedBy() === $user,
+                'vote' => $userVote ? [
+                    'id' => $userVote->getVote()->getId(),
+                    'label' => $userVote->getVote()->getLabel(),
+                    'createdAt' => $userVote->getCreatedAt()->format('Y-m-d H:i:s'),
+                    'updatedAt' => $userVote->getUpdatedAt()->format('Y-m-d H:i:s'),
+                ] : null,
             ];
         }
 
@@ -38,6 +46,7 @@ class RoomController extends AbstractController
             'participants' => $participants,
             'status' => 'active', // You can add actual status field to Room entity later
             'createdBy' => $room->getCreatedBy()->getUserLoginId(),
+            'votesVisible' => $room->getVotesVisible() ?? false,
         ]);
     }
 }

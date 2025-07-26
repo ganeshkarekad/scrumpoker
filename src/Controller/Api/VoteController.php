@@ -33,6 +33,44 @@ class VoteController extends AbstractController
         return $this->json($votesData);
     }
 
+    #[Route('/toggle-visibility', name: 'toggle_visibility', methods: ['POST'])]
+    public function toggleVisibility(
+        Request $request,
+        EntityManagerInterface $entityManager,
+        RoomRepository $roomRepository
+    ): JsonResponse {
+        // Get JSON data from request
+        $data = json_decode($request->getContent(), true);
+
+        if (!$data || !isset($data['roomKey'])) {
+            return $this->json([
+                'error' => 'Missing roomKey'
+            ], Response::HTTP_BAD_REQUEST);
+        }
+
+        $roomKey = $data['roomKey'];
+
+        // Find the room
+        $room = $roomRepository->findOneBy(['roomKey' => $roomKey]);
+        if (!$room) {
+            return $this->json([
+                'error' => 'Room not found'
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        // Toggle the votes visibility
+        $currentVisibility = $room->getVotesVisible() ?? false;
+        $room->setVotesVisible(!$currentVisibility);
+
+        $entityManager->flush();
+
+        return $this->json([
+            'message' => 'Vote visibility toggled successfully',
+            'roomKey' => $roomKey,
+            'votesVisible' => $room->getVotesVisible()
+        ]);
+    }
+
     #[Route('/reset', name: 'reset', methods: ['POST'])]
     public function reset(
         Request $request,
@@ -58,18 +96,22 @@ class VoteController extends AbstractController
             ], Response::HTTP_NOT_FOUND);
         }
 
-        // Delete all user votes for this room
+        // Delete all user votes for this room and hide votes
         $userVotes = $room->getUserVotes();
         foreach ($userVotes as $userVote) {
             $entityManager->remove($userVote);
         }
+
+        // Hide votes after reset
+        $room->setVotesVisible(false);
 
         $entityManager->flush();
 
         return $this->json([
             'message' => 'All votes reset successfully',
             'roomKey' => $roomKey,
-            'resetCount' => count($userVotes)
+            'resetCount' => count($userVotes),
+            'votesVisible' => false
         ]);
     }
 

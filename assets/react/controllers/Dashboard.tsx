@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QueryProvider } from '../providers/QueryProvider';
 import { api, queryKeys, Vote, Participant } from '../services/api';
@@ -15,22 +15,25 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
     // State to store the selected vote
     const [selectedVote, setSelectedVote] = useState<Vote | null>(null);
 
-    // State to control vote visibility
-    const [showVotes, setShowVotes] = useState<boolean>(false);
-
     const queryClient = useQueryClient();
 
-    // Use TanStack Query to fetch votes
+    // Use TanStack Query to fetch votes with polling
     const { data: votes, isLoading: votesLoading, error: votesError } = useQuery({
         queryKey: queryKeys.votes(),
         queryFn: () => api.fetchVotes(),
+        refetchInterval: 5000, // Poll every 5 seconds for votes (less frequent since they change rarely)
+        refetchIntervalInBackground: true,
     });
 
-    // Use TanStack Query to fetch room data
+    // Use TanStack Query to fetch room data with polling
     const { data: roomData, isLoading: roomLoading, error: roomError } = useQuery({
         queryKey: queryKeys.room(roomKey),
         queryFn: () => api.fetchRoom(roomKey),
         enabled: !!roomKey,
+        refetchInterval: roomError ? false : 1000, // Poll every 1 second, stop on error
+        refetchIntervalInBackground: true, // Continue polling when tab is not active
+        retry: 3, // Retry failed requests up to 3 times
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
     });
 
     // Use TanStack Query mutation for submitting votes
@@ -45,13 +48,24 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
         },
     });
 
+    // Use TanStack Query mutation for toggling vote visibility
+    const toggleVisibilityMutation = useMutation({
+        mutationFn: () => api.toggleVoteVisibility(roomKey),
+        onSuccess: () => {
+            // Invalidate and refetch room data after successful toggle
+            queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
+        },
+        onError: (error) => {
+            console.error('Failed to toggle vote visibility:', error);
+        },
+    });
+
     // Use TanStack Query mutation for resetting votes
     const resetVotesMutation = useMutation({
         mutationFn: () => api.resetVotes(roomKey),
         onSuccess: () => {
             // Clear selected vote and invalidate room data
             setSelectedVote(null);
-            setShowVotes(false);
             queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
         },
         onError: (error) => {
@@ -67,8 +81,23 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
         submitVoteMutation.mutate(vote);
     };
 
+    // Sync selected vote with current user's actual vote from room data
+    useEffect(() => {
+        if (roomData?.participants) {
+            const currentUser = roomData.participants.find(p => p.id === currentUserId);
+            if (currentUser?.vote) {
+                setSelectedVote({
+                    id: currentUser.vote.id,
+                    label: currentUser.vote.label
+                });
+            } else {
+                setSelectedVote(null);
+            }
+        }
+    }, [roomData, currentUserId]);
+
     const handleShowHideClick = () => {
-        setShowVotes(!showVotes);
+        toggleVisibilityMutation.mutate();
     };
 
     const handleResetClick = () => {
@@ -100,8 +129,8 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
     };
 
     const renderParticipantVote = (participant: Participant) => {
-        // If votes are hidden, show "Hidden" for all participants
-        if (!showVotes) {
+        // If votes are hidden (based on room state), show "Hidden" for all participants
+        if (!roomData?.votesVisible) {
             return (
                 <span className="badge bg-warning">
                     Hidden
@@ -109,17 +138,16 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
             );
         }
 
-        // If this is the current user and they have selected a vote, show it
-        if (participant.id === currentUserId && selectedVote) {
+        // If participant has voted, show their vote
+        if (participant.vote) {
             return (
-                <span className="badge bg-primary">
-                    {selectedVote.label}
+                <span className={`badge ${participant.id === currentUserId ? 'bg-primary' : 'bg-success'}`}>
+                    {participant.vote.label}
                 </span>
             );
         }
 
-        // TODO: Show actual votes from other participants when available
-        // For now, show "No Vote" for other participants
+        // If no vote, show "No Vote"
         return (
             <span className="badge bg-secondary">
                 No Vote
@@ -186,16 +214,25 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
                 <div className="col-12">
                     <div className="d-flex justify-content-center gap-3">
                         <button
-                            className={`btn btn-lg ${showVotes ? 'btn-warning' : 'btn-outline-warning'}`}
+                            className={`btn btn-lg ${roomData?.votesVisible ? 'btn-warning' : 'btn-outline-warning'}`}
                             onClick={handleShowHideClick}
-                            disabled={submitVoteMutation.isPending || resetVotesMutation.isPending}
+                            disabled={submitVoteMutation.isPending || resetVotesMutation.isPending || toggleVisibilityMutation.isPending}
                         >
-                            {showVotes ? 'Hide Votes' : 'Show Votes'}
+                            {toggleVisibilityMutation.isPending ? (
+                                <>
+                                    <div className="spinner-border spinner-border-sm me-2" role="status">
+                                        <span className="visually-hidden">Toggling...</span>
+                                    </div>
+                                    Toggling...
+                                </>
+                            ) : (
+                                roomData?.votesVisible ? 'Hide Votes' : 'Show Votes'
+                            )}
                         </button>
                         <button
                             className="btn btn-danger btn-lg"
                             onClick={handleResetClick}
-                            disabled={submitVoteMutation.isPending || resetVotesMutation.isPending}
+                            disabled={submitVoteMutation.isPending || resetVotesMutation.isPending || toggleVisibilityMutation.isPending}
                         >
                             {resetVotesMutation.isPending ? (
                                 <>
@@ -213,7 +250,7 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
             </div>
 
             {/* Error/Success Messages */}
-            {(submitVoteMutation.isError || resetVotesMutation.isError) && (
+            {(submitVoteMutation.isError || resetVotesMutation.isError || toggleVisibilityMutation.isError) && (
                 <div className="row mt-2">
                     <div className="col-12">
                         <div className="alert alert-danger">
@@ -223,17 +260,21 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
                             {resetVotesMutation.isError && (
                                 <>Error resetting votes: {resetVotesMutation.error instanceof Error ? resetVotesMutation.error.message : 'Unknown error'}</>
                             )}
+                            {toggleVisibilityMutation.isError && (
+                                <>Error toggling vote visibility: {toggleVisibilityMutation.error instanceof Error ? toggleVisibilityMutation.error.message : 'Unknown error'}</>
+                            )}
                         </div>
                     </div>
                 </div>
             )}
 
-            {(submitVoteMutation.isSuccess || resetVotesMutation.isSuccess) && (
+            {(submitVoteMutation.isSuccess || resetVotesMutation.isSuccess || toggleVisibilityMutation.isSuccess) && (
                 <div className="row mt-2">
                     <div className="col-12">
                         <div className="alert alert-success">
                             {submitVoteMutation.isSuccess && 'Vote submitted successfully!'}
                             {resetVotesMutation.isSuccess && 'All votes reset successfully!'}
+                            {toggleVisibilityMutation.isSuccess && 'Vote visibility toggled successfully!'}
                         </div>
                     </div>
                 </div>
@@ -243,8 +284,19 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
             <div className="row mt-4">
                 <div className="col-12">
                     <div className="card">
-                        <div className="card-header">
+                        <div className="card-header d-flex justify-content-between align-items-center">
                             <h5 className="mb-0">Participants ({roomData?.participants?.length || 0})</h5>
+                            <div className="d-flex align-items-center">
+                                <span className="badge bg-success me-2">
+                                    <i className="fas fa-circle me-1" style={{ fontSize: '8px' }}></i>
+                                    Live
+                                </span>
+                                {roomLoading && (
+                                    <div className="spinner-border spinner-border-sm text-primary" role="status">
+                                        <span className="visually-hidden">Updating...</span>
+                                    </div>
+                                )}
+                            </div>
                         </div>
                         <div className="card-body p-0">
                             <div className="table-responsive">

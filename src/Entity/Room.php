@@ -36,6 +36,9 @@ class Room
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private ?\DateTime $updatedAt = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $votesVisible = false;
+
     /**
      * @var Collection<int, User>
      */
@@ -117,6 +120,17 @@ class Room
     public function setUpdatedAt(\DateTime $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+        return $this;
+    }
+
+    public function getVotesVisible(): bool
+    {
+        return $this->votesVisible;
+    }
+
+    public function setVotesVisible(bool $votesVisible): static
+    {
+        $this->votesVisible = $votesVisible;
         return $this;
     }
 

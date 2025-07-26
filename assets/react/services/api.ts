@@ -6,10 +6,18 @@ export interface Vote {
     label: string;
 }
 
+export interface ParticipantVote {
+    id: number;
+    label: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
 export interface Participant {
     id: string;
     username: string;
     isCreator: boolean;
+    vote: ParticipantVote | null;
 }
 
 export interface RoomData {
@@ -18,6 +26,7 @@ export interface RoomData {
     status: string;
     currentStory?: string;
     createdBy: string;
+    votesVisible: boolean;
 }
 
 // API functions
@@ -67,6 +76,30 @@ export const api = {
         return response.json();
     },
 
+    // Toggle vote visibility in a room
+    toggleVoteVisibility: async (roomKey: string): Promise<any> => {
+        console.log('Toggling vote visibility for room:', roomKey);
+        const response = await fetch('/api/vote/toggle-visibility', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                roomKey,
+            }),
+        });
+
+        console.log('Toggle visibility response status:', response.status);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('Toggle visibility API Error:', errorData);
+            throw new Error(errorData.error || 'Failed to toggle vote visibility');
+        }
+
+        return response.json();
+    },
+
     // Reset all votes in a room
     resetVotes: async (roomKey: string): Promise<any> => {
         console.log('Resetting votes for room:', roomKey);
@@ -86,6 +119,30 @@ export const api = {
             const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
             console.error('Reset API Error:', errorData);
             throw new Error(errorData.error || 'Failed to reset votes');
+        }
+
+        return response.json();
+    },
+
+    // Toggle vote visibility in a room
+    toggleVoteVisibility: async (roomKey: string): Promise<any> => {
+        console.log('Toggling vote visibility for room:', roomKey);
+        const response = await fetch('/api/vote/toggle-visibility', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                roomKey,
+            }),
+        });
+
+        console.log('Toggle visibility response status:', response.status);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('Toggle visibility API Error:', errorData);
+            throw new Error(errorData.error || 'Failed to toggle vote visibility');
         }
 
         return response.json();
