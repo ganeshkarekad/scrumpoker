@@ -40,23 +40,47 @@ when@test:
 when@prod:
     monolog:
         handlers:
+            # Main handler - logs all messages to file
             main:
+                type: stream
+                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                level: info
+                channels: ["!event"]
+                formatter: monolog.formatter.json
+
+            # Critical errors handler - uses fingers_crossed for buffering
+            critical:
                 type: fingers_crossed
                 action_level: error
-                handler: nested
+                handler: critical_nested
                 excluded_http_codes: [404, 405]
-                buffer_size: 50 # How many messages should be saved? Prevent memory leaks
-            nested:
+                buffer_size: 50
+                channels: ["!event"]
+
+            critical_nested:
                 type: stream
-                path: php://stderr
-                level: debug
+                path: "%kernel.logs_dir%/critical.log"
+                level: error
                 formatter: monolog.formatter.json
+
+            # Console handler for CLI commands
             console:
                 type: console
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine"]
+
+            # Deprecation warnings
             deprecation:
                 type: stream
                 channels: [deprecation]
-                path: php://stderr
+                path: "%kernel.logs_dir%/deprecation.log"
+                level: info
                 formatter: monolog.formatter.json
+
+            # Application errors to stderr (for Docker/systemd)
+            stderr:
+                type: stream
+                path: php://stderr
+                level: error
+                formatter: monolog.formatter.json
+                channels: ["!event", "!doctrine", "!deprecation"]
