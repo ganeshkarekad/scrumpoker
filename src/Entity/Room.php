@@ -60,12 +60,21 @@ class Room
 
     public function __construct()
     {
-        $this->roomKey = Uuid::v4()->toRfc4122();
+        // Don't auto-generate roomKey in constructor
+        // It will be generated when needed via generateRoomKey() method
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTime();
         $this->users = new ArrayCollection();
         $this->roomAdmins = new ArrayCollection();
         $this->userVotes = new ArrayCollection();
+    }
+
+    /**
+     * Generate a new room key (UUID)
+     */
+    public function generateRoomKey(): void
+    {
+        $this->roomKey = Uuid::v4()->toRfc4122();
     }
 
     #[ORM\PreUpdate]

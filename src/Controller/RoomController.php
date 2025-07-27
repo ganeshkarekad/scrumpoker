@@ -36,6 +36,7 @@ final class RoomController extends AbstractController
 
             // Create room
             $room = new Room();
+            $room->generateRoomKey(); // Generate the UUID for new rooms
             $room->setCreatedBy($user);
             $room->addUser($user);
 
