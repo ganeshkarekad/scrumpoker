@@ -9,6 +9,9 @@
                 <a href="{{ path('app_info_terms') }}" class="footer-link">
                     📋 Terms & Conditions
                 </a>
+                <button type="button" class="footer-link footer-link--button" data-bs-toggle="modal" data-bs-target="#contactModal">
+                    📧 Contact Us
+                </button>
             </div>
 
             <div class="footer__donation">
@@ -20,3 +23,63 @@
         </div>
     </div>
 </footer>
+
+<!-- Contact Modal -->
+<div class="modal fade" id="contactModal" tabindex="-1" aria-labelledby="contactModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content contact-modal">
+            <div class="modal-header contact-modal__header">
+                <h5 class="modal-title contact-modal__title" id="contactModalLabel">
+                    <span class="contact-modal__icon">📧</span>
+                    Contact Us
+                </h5>
+                <button type="button" class="btn-close contact-modal__close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body contact-modal__body">
+                <div class="contact-modal__content">
+                    <div class="contact-modal__intro">
+                        <h6 class="contact-modal__subtitle">We'd Love to Hear From You!</h6>
+                        <p class="contact-modal__description">
+                            Have concerns, feedback, or suggestions about {{ constant('App\\Constant\\Site::NAME') }}?
+                            We're always looking to improve and would appreciate your input.
+                        </p>
+                    </div>
+
+                    <div class="contact-modal__email-section">
+                        <div class="contact-modal__email-card">
+                            <div class="contact-modal__email-icon">✉️</div>
+                            <div class="contact-modal__email-content">
+                                <h6 class="contact-modal__email-title">Send us an email</h6>
+                                <a href="mailto:jishu.codes@gmail.com?subject=Feedback for {{ constant('App\\Constant\\Site::NAME') }}"
+                                   class="contact-modal__email-link">
+                                    jishu.codes@gmail.com
+                                </a>
+                                <p class="contact-modal__email-note">
+                                    Click to open your email client with a pre-filled subject line
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="contact-modal__suggestions">
+                        <h6 class="contact-modal__suggestions-title">What can you share with us?</h6>
+                        <ul class="contact-modal__suggestions-list">
+                            <li>🐛 Bug reports or technical issues</li>
+                            <li>💡 Feature requests and suggestions</li>
+                            <li>🎨 UI/UX feedback and improvements</li>
+                            <li>📈 Performance concerns</li>
+                            <li>❤️ General feedback and testimonials</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer contact-modal__footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="mailto:jishu.codes@gmail.com?subject=Feedback for {{ constant('App\\Constant\\Site::NAME') }}"
+                   class="btn btn-primary">
+                    📧 Send Email
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
