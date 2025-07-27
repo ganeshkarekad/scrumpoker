@@ -23,8 +23,7 @@ class RoomType extends AbstractType
                     'class' => 'form-control',
                     'placeholder' => 'Enter your name',
                     'minlength' => 2,
-                    'maxlength' => 180,
-                    'value' => ''
+                    'maxlength' => 180
                 ]
             ])
             ->add('roomKey', TextType::class, [
@@ -34,8 +33,7 @@ class RoomType extends AbstractType
                     'placeholder' => 'Enter room key',
                     'minlength' => 36,
                     'maxlength' => 36,
-                    'pattern' => '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}',
-                    'value' => ''
+                    'pattern' => '[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}'
                 ]
             ])
         ;

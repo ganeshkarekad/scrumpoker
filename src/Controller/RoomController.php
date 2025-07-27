@@ -154,7 +154,7 @@ final class RoomController extends AbstractController
             }
         }
 
-        return $this->redirectToRoute('app_home_index');
+        return $this->redirectToRoute('app_home_index', ['roomKey' => $roomKey]);
 
         // User not logged in, show join form for this specific room
         $joinRoom = new Room();
