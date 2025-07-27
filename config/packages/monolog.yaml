@@ -6,9 +6,10 @@ when@dev:
     monolog:
         handlers:
             main:
-                type: stream
+                type: rotating_file
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: debug
+                max_files: 7  # Keep dev logs for 7 days (shorter retention for development)
                 channels: ["!event"]
             # uncomment to get logging in your browser
             # you may have to allow bigger header sizes in your Web server configuration
@@ -40,11 +41,12 @@ when@test:
 when@prod:
     monolog:
         handlers:
-            # Main handler - logs all messages to file
+            # Main handler - daily rotating logs with 15-day retention
             main:
-                type: stream
+                type: rotating_file
                 path: "%kernel.logs_dir%/%kernel.environment%.log"
                 level: info
+                max_files: 15  # Keep logs for 15 days
                 channels: ["!event"]
                 formatter: monolog.formatter.json
 
@@ -58,9 +60,10 @@ when@prod:
                 channels: ["!event"]
 
             critical_nested:
-                type: stream
+                type: rotating_file
                 path: "%kernel.logs_dir%/critical.log"
                 level: error
+                max_files: 15  # Keep critical logs for 15 days
                 formatter: monolog.formatter.json
 
             # Console handler for CLI commands
@@ -69,12 +72,13 @@ when@prod:
                 process_psr_3_messages: false
                 channels: ["!event", "!doctrine"]
 
-            # Deprecation warnings
+            # Deprecation warnings - daily rotation
             deprecation:
-                type: stream
+                type: rotating_file
                 channels: [deprecation]
                 path: "%kernel.logs_dir%/deprecation.log"
                 level: info
+                max_files: 15  # Keep deprecation logs for 15 days
                 formatter: monolog.formatter.json
 
             # Application errors to stderr (for Docker/systemd)
