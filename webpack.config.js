@@ -53,7 +53,8 @@ Encore
     // Displays build status system notifications to the user
     // .enableBuildNotifications()
 
-    .enableSourceMaps(!Encore.isProduction())
+    // Enable source maps in both development and production for debugging
+    .enableSourceMaps(true)
     // enables hashed filenames (e.g. app.abc123.css)
     .enableVersioning(Encore.isProduction())
 
