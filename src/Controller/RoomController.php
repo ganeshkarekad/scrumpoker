@@ -150,6 +150,7 @@ final class RoomController extends AbstractController
                 return $this->render('room/index.html.twig', [
                     'room' => $room,
                     'user' => $user,
+                    'mercureUrl' => $_ENV['MERCURE_PUBLIC_URL'] ?? 'http://127.0.0.1:3000/.well-known/mercure',
                 ]);
             }
         }

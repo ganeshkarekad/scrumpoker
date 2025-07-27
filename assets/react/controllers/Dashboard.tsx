@@ -1,20 +1,25 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { QueryProvider } from '../providers/QueryProvider';
 import { api, queryKeys, Vote, Participant } from '../services/api';
 import { useMercure } from '../hooks/useMercure';
 import { VoteChart } from '../components/VoteChart';
+import { createMercureClient } from '../services/mercure';
 
 interface DashboardProps {
     roomKey: string;
     currentUserId: string;
+    mercureUrl: string;
 }
 
-function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
+function DashboardContent({ roomKey, currentUserId, mercureUrl }: DashboardProps) {
     // State to store the selected vote
     const [selectedVote, setSelectedVote] = useState<Vote | null>(null);
 
     const queryClient = useQueryClient();
+
+    // Create Mercure client instance with the provided URL
+    const mercureClient = useMemo(() => createMercureClient(mercureUrl), [mercureUrl]);
 
     // Use TanStack Query to fetch votes (no polling, just initial load)
     const { data: votes, isLoading: votesLoading, error: votesError } = useQuery({
@@ -59,6 +64,7 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
     // Use Mercure for real-time updates
     const mercureState = useMercure({
         roomKey,
+        mercureClient,
         onVoteUpdate: handleVoteUpdate,
         onVisibilityToggle: handleVisibilityToggle,
         onVoteReset: handleVoteReset,

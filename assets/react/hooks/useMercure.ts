@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { mercureClient, MercureMessage, MercureEventHandler } from '../services/mercure';
+import { MercureClient, MercureMessage, MercureEventHandler } from '../services/mercure';
 
 export interface UseMercureOptions {
     roomKey: string;
+    mercureClient: MercureClient;
     onMessage?: MercureEventHandler;
     onVoteUpdate?: (data: any) => void;
     onVisibilityToggle?: (data: any) => void;
@@ -19,7 +20,7 @@ export interface MercureConnectionState {
 }
 
 export function useMercure(options: UseMercureOptions): MercureConnectionState {
-    const { roomKey, onMessage, onVoteUpdate, onVisibilityToggle, onVoteReset, onParticipantUpdate, onRoomUpdate } = options;
+    const { roomKey, mercureClient, onMessage, onVoteUpdate, onVisibilityToggle, onVoteReset, onParticipantUpdate, onRoomUpdate } = options;
 
     const [connectionState, setConnectionState] = useState<MercureConnectionState>({
         isConnected: false,

@@ -16,18 +16,22 @@ export class MercureClient {
     private reconnectDelay = 1000; // Start with 1 second
     private isConnected = false;
 
-    constructor(private mercureUrl: string = 'http://127.0.0.1:3000/.well-known/mercure') {}
+    constructor(private mercureUrl: string) {
+        if (!mercureUrl) {
+            throw new Error('Mercure URL is required');
+        }
+    }
 
     /**
      * Subscribe to updates for a specific room
      */
     subscribe(roomKey: string, handler: MercureEventHandler): () => void {
         const topic = `room/${roomKey}`;
-        
+
         if (!this.handlers.has(topic)) {
             this.handlers.set(topic, new Set());
         }
-        
+
         this.handlers.get(topic)!.add(handler);
 
         // Connect if not already connected
@@ -59,12 +63,9 @@ export class MercureClient {
             const url = new URL(this.mercureUrl);
             url.searchParams.append('topic', `room/${roomKey}`);
 
-            console.log('Connecting to Mercure:', url.toString());
-
             this.eventSource = new EventSource(url.toString());
 
             this.eventSource.onopen = () => {
-                console.log('Mercure connection opened');
                 this.isConnected = true;
                 this.reconnectAttempts = 0;
                 this.reconnectDelay = 1000;
@@ -73,7 +74,6 @@ export class MercureClient {
             this.eventSource.onmessage = (event) => {
                 try {
                     const message: MercureMessage = JSON.parse(event.data);
-                    console.log('Received Mercure message:', message);
                     this.handleMessage(message);
                 } catch (error) {
                     console.error('Error parsing Mercure message:', error);
@@ -98,7 +98,7 @@ export class MercureClient {
     private handleMessage(message: MercureMessage): void {
         const topic = `room/${message.roomKey}`;
         const handlers = this.handlers.get(topic);
-        
+
         if (handlers) {
             handlers.forEach(handler => {
                 try {
@@ -122,9 +122,7 @@ export class MercureClient {
         if (this.reconnectAttempts < this.maxReconnectAttempts) {
             this.reconnectAttempts++;
             const delay = this.reconnectDelay * Math.pow(2, this.reconnectAttempts - 1);
-            
-            console.log(`Attempting to reconnect to Mercure in ${delay}ms (attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-            
+
             setTimeout(() => {
                 if (this.handlers.size > 0) { // Only reconnect if we still have handlers
                     this.connect(roomKey);
@@ -140,7 +138,6 @@ export class MercureClient {
      */
     disconnect(): void {
         if (this.eventSource) {
-            console.log('Disconnecting from Mercure');
             this.eventSource.close();
             this.eventSource = null;
             this.isConnected = false;
@@ -161,7 +158,7 @@ export class MercureClient {
      */
     getConnectionStatus(): 'connected' | 'connecting' | 'disconnected' | 'error' {
         if (!this.eventSource) return 'disconnected';
-        
+
         switch (this.eventSource.readyState) {
             case EventSource.CONNECTING:
                 return 'connecting';
@@ -175,5 +172,9 @@ export class MercureClient {
     }
 }
 
-// Global Mercure client instance
-export const mercureClient = new MercureClient();
+/**
+ * Create a new Mercure client instance with the provided URL
+ */
+export function createMercureClient(mercureUrl: string): MercureClient {
+    return new MercureClient(mercureUrl);
+}

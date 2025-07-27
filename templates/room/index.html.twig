@@ -3,7 +3,11 @@
 {% block title %}Room {{ room.roomKey }} - {{ constant('App\\Constant\\Site::NAME') }}{% endblock %}
 
 {% block content %}
-    <div {{ react_component('Dashboard', { 'roomKey': room.roomKey, 'currentUserId' : user.userLoginId })|raw }}>
+    <div {{ react_component('Dashboard', {
+        'roomKey': room.roomKey,
+        'currentUserId': user.userLoginId,
+        'mercureUrl': mercureUrl
+    })|raw }}>
     </div>
 
 {% endblock %}
