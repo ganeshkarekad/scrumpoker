@@ -8,6 +8,7 @@ use App\Form\RoomType;
 use App\Form\UserType;
 use App\Repository\RoomRepository;
 use App\Repository\UserRepository;
+use App\Service\MercurePublisher;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -23,7 +24,7 @@ final class RoomController extends AbstractController
 
 
     #[Route('create', name: 'create')]
-    public function create(Request $request, EntityManagerInterface $entityManager, SessionInterface $session): Response
+    public function create(Request $request, EntityManagerInterface $entityManager, SessionInterface $session, MercurePublisher $mercurePublisher): Response
     {
         $user = new User();
         $form = $this->createForm(UserType::class, $user);
@@ -44,6 +45,15 @@ final class RoomController extends AbstractController
             // Store userLoginId in session for "login"
             $session->set('user_login_id', $user->getUserLoginId());
 
+            // Publish participant update for room creation
+            $participantData = [
+                'id' => $user->getUserLoginId(),
+                'username' => $user->getUsername(),
+                'isCreator' => true,
+                'vote' => null,
+            ];
+            $mercurePublisher->publishParticipantUpdate($room->getRoomKey(), $participantData, 'joined');
+
             return $this->redirectToRoute('app_room_show', [
                 'roomKey' => $room->getRoomKey(),
             ]);
@@ -52,7 +62,7 @@ final class RoomController extends AbstractController
     }
 
     #[Route('join', name: 'join')]
-    public function join(Request $request, RoomRepository $roomRepository, EntityManagerInterface $entityManager, SessionInterface $session): Response
+    public function join(Request $request, RoomRepository $roomRepository, EntityManagerInterface $entityManager, SessionInterface $session, MercurePublisher $mercurePublisher): Response
     {
 
         $roomKey = $request->get('room')['roomKey'];
@@ -81,6 +91,15 @@ final class RoomController extends AbstractController
             // Store userLoginId in session for "login"
             $session->set('user_login_id', $user->getUserLoginId());
 
+            // Publish participant update for user joining
+            $participantData = [
+                'id' => $user->getUserLoginId(),
+                'username' => $user->getUsername(),
+                'isCreator' => $existingRoom->getCreatedBy() === $user,
+                'vote' => null,
+            ];
+            $mercurePublisher->publishParticipantUpdate($existingRoom->getRoomKey(), $participantData, 'joined');
+
             return $this->redirectToRoute('app_room_show', [
                 'roomKey' => $existingRoom->getRoomKey(),
             ]);
@@ -95,7 +114,7 @@ final class RoomController extends AbstractController
     }
 
     #[Route('{roomKey}', name: 'show')]
-    public function show($roomKey, Request $request, RoomRepository $roomRepository, UserRepository $userRepository, SessionInterface $session): Response
+    public function show($roomKey, Request $request, RoomRepository $roomRepository, UserRepository $userRepository, SessionInterface $session, EntityManagerInterface $entityManager, MercurePublisher $mercurePublisher): Response
     {
         $room = $roomRepository->findOneBy(['roomKey' => $roomKey]);
 
@@ -111,7 +130,23 @@ final class RoomController extends AbstractController
         if ($userLoginId) {
             $user = $userRepository->findByUserLoginId($userLoginId);
             if ($user) {
-                // User is logged in, show the room
+                // Check if user is a participant in the room
+                if (!$room->getUsers()->contains($user)) {
+                    // User is not in the room, add them back
+                    $room->addUser($user);
+                    $entityManager->flush();
+
+                    // Publish participant update for user rejoining
+                    $participantData = [
+                        'id' => $user->getUserLoginId(),
+                        'username' => $user->getUsername(),
+                        'isCreator' => $room->getCreatedBy() === $user,
+                        'vote' => null,
+                    ];
+                    $mercurePublisher->publishParticipantUpdate($room->getRoomKey(), $participantData, 'joined');
+                }
+
+                // User is logged in and is a participant, show the room
                 return $this->render('room/index.html.twig', [
                     'room' => $room,
                     'user' => $user,

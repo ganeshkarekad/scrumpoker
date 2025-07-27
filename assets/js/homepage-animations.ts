@@ -30,7 +30,6 @@ export default class extends Controller<HTMLElement> {
     private observer: IntersectionObserver | null = null;
 
     connect(): void {
-        console.log('Homepage animations controller connected');
         this.initializeAnimations();
         this.setupIntersectionObserver();
         this.startTypingAnimation();
@@ -89,7 +88,7 @@ export default class extends Controller<HTMLElement> {
         if (isFeatureCard || isStepCard) {
             const cards = isFeatureCard ? this.featureCardTargets : this.stepCardTargets;
             const index = cards.indexOf(element);
-            
+
             setTimeout(() => {
                 element.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
                 element.style.opacity = '1';
@@ -127,7 +126,7 @@ export default class extends Controller<HTMLElement> {
             // Initial state
             card.style.opacity = '0';
             card.style.transform = 'translateY(100px) rotate(0deg)';
-            
+
             // Animate in with delay
             setTimeout(() => {
                 card.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
@@ -141,18 +140,17 @@ export default class extends Controller<HTMLElement> {
     createRoom(event: Event): void {
         event.preventDefault();
         const button = event.currentTarget as HTMLButtonElement;
-        
+
         // Add loading state
         button.style.transform = 'scale(0.95)';
         button.textContent = 'Creating...';
-        
+
         // Simulate room creation (replace with actual logic)
         setTimeout(() => {
             button.style.transform = 'scale(1)';
             button.textContent = '🚀 Create New Room';
-            
+
             // Here you would typically redirect to room creation
-            console.log('Creating new room...');
             // window.location.href = '/room/create';
         }, 1000);
     }
@@ -177,7 +175,7 @@ export default class extends Controller<HTMLElement> {
         window.addEventListener('scroll', () => {
             const scrolled = window.pageYOffset;
             const shapes = document.querySelectorAll('.shape');
-            
+
             shapes.forEach((shape, index) => {
                 const speed = 0.5 + (index * 0.1);
                 const yPos = -(scrolled * speed);
@@ -188,8 +186,8 @@ export default class extends Controller<HTMLElement> {
 
     // Utility method to animate element with custom options
     private animateElementWithOptions(
-        element: HTMLElement, 
-        properties: Partial<CSSStyleDeclaration>, 
+        element: HTMLElement,
+        properties: Partial<CSSStyleDeclaration>,
         options: AnimationOptions = {}
     ): Promise<void> {
         return new Promise((resolve) => {
@@ -201,9 +199,9 @@ export default class extends Controller<HTMLElement> {
 
             setTimeout(() => {
                 element.style.transition = `all ${duration}ms ${easing}`;
-                
+
                 Object.assign(element.style, properties);
-                
+
                 setTimeout(() => {
                     resolve();
                 }, duration);
@@ -214,7 +212,7 @@ export default class extends Controller<HTMLElement> {
     // Add pulse effect to buttons
     private addButtonPulseEffect(): void {
         const buttons = document.querySelectorAll('.hero__btn, .join-form__btn');
-        
+
         buttons.forEach(button => {
             button.addEventListener('click', (e) => {
                 const ripple = document.createElement('span');
@@ -222,7 +220,7 @@ export default class extends Controller<HTMLElement> {
                 const size = Math.max(rect.width, rect.height);
                 const x = (e as MouseEvent).clientX - rect.left - size / 2;
                 const y = (e as MouseEvent).clientY - rect.top - size / 2;
-                
+
                 ripple.style.cssText = `
                     position: absolute;
                     width: ${size}px;
@@ -235,9 +233,9 @@ export default class extends Controller<HTMLElement> {
                     animation: ripple 0.6s linear;
                     pointer-events: none;
                 `;
-                
+
                 button.appendChild(ripple);
-                
+
                 setTimeout(() => {
                     ripple.remove();
                 }, 600);
@@ -262,7 +260,7 @@ style.textContent = `
             opacity: 0;
         }
     }
-    
+
     .hero__btn, .join-form__btn {
         position: relative;
         overflow: hidden;

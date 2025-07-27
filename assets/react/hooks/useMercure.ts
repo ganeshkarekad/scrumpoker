@@ -65,8 +65,6 @@ export function useMercure(options: UseMercureOptions): MercureConnectionState {
 
     // Handle incoming messages
     const handleMessage = useCallback((message: MercureMessage) => {
-        console.log('Received message in hook:', message);
-
         setConnectionState(prev => ({
             ...prev,
             lastMessage: message,
@@ -113,8 +111,6 @@ export function useMercure(options: UseMercureOptions): MercureConnectionState {
     useEffect(() => {
         if (!roomKey) return;
 
-        console.log('Setting up Mercure subscription for room:', roomKey);
-
         // Subscribe to Mercure updates
         const unsubscribe = mercureClient.subscribe(roomKey, handleMessage);
 
@@ -126,7 +122,6 @@ export function useMercure(options: UseMercureOptions): MercureConnectionState {
 
         // Cleanup function
         return () => {
-            console.log('Cleaning up Mercure subscription for room:', roomKey);
             unsubscribe();
             clearInterval(statusInterval);
         };

@@ -51,7 +51,6 @@ export const api = {
 
     // Submit a vote
     submitVote: async (roomKey: string, userId: string, voteId: number): Promise<any> => {
-        console.log('Submitting vote:', { roomKey, userId, voteId });
         const response = await fetch('/api/vote/add', {
             method: 'POST',
             headers: {
@@ -64,9 +63,6 @@ export const api = {
             }),
         });
 
-        console.log('Response status:', response.status);
-        console.log('Response URL:', response.url);
-
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
             console.error('API Error:', errorData);
@@ -78,7 +74,6 @@ export const api = {
 
     // Toggle vote visibility in a room
     toggleVoteVisibility: async (roomKey: string): Promise<any> => {
-        console.log('Toggling vote visibility for room:', roomKey);
         const response = await fetch('/api/vote/toggle-visibility', {
             method: 'POST',
             headers: {
@@ -88,8 +83,6 @@ export const api = {
                 roomKey,
             }),
         });
-
-        console.log('Toggle visibility response status:', response.status);
 
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
@@ -102,7 +95,6 @@ export const api = {
 
     // Reset all votes in a room
     resetVotes: async (roomKey: string): Promise<any> => {
-        console.log('Resetting votes for room:', roomKey);
         const response = await fetch('/api/vote/reset', {
             method: 'POST',
             headers: {
@@ -113,8 +105,6 @@ export const api = {
             }),
         });
 
-        console.log('Reset response status:', response.status);
-
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
             console.error('Reset API Error:', errorData);
@@ -124,25 +114,22 @@ export const api = {
         return response.json();
     },
 
-    // Toggle vote visibility in a room
-    toggleVoteVisibility: async (roomKey: string): Promise<any> => {
-        console.log('Toggling vote visibility for room:', roomKey);
-        const response = await fetch('/api/vote/toggle-visibility', {
+    // Leave a room
+    leaveRoom: async (roomKey: string, userId: string): Promise<any> => {
+        const response = await fetch(`/api/room/${roomKey}/leave`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                roomKey,
+                userId,
             }),
         });
 
-        console.log('Toggle visibility response status:', response.status);
-
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-            console.error('Toggle visibility API Error:', errorData);
-            throw new Error(errorData.error || 'Failed to toggle vote visibility');
+            console.error('Leave room API Error:', errorData);
+            throw new Error(errorData.error || 'Failed to leave room');
         }
 
         return response.json();

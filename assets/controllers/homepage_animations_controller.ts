@@ -32,7 +32,6 @@ export default class extends Controller<HTMLElement> {
     private observer: IntersectionObserver | null = null;
 
     connect(): void {
-        console.log('Homepage animations controller connected');
         this.initializeAnimations();
         this.setupIntersectionObserver();
         this.startTypingAnimation();
@@ -168,7 +167,6 @@ export default class extends Controller<HTMLElement> {
             button.textContent = originalText;
 
             // Here you would typically redirect to room creation
-            console.log('Creating new room...');
             // For now, just redirect to the room creation endpoint
             window.location.href = '/room/create';
         }, 1000);

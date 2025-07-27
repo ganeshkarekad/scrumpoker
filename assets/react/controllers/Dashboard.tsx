@@ -11,8 +11,6 @@ interface DashboardProps {
 }
 
 function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
-    console.log('Dashboard render - roomKey:', roomKey, 'currentUserId:', currentUserId);
-
     // State to store the selected vote
     const [selectedVote, setSelectedVote] = useState<Vote | null>(null);
 
@@ -33,32 +31,27 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
 
     // Create stable handler functions using useCallback
     const handleVoteUpdate = useCallback((data: any) => {
-        console.log('Vote update received:', data);
         // Invalidate room data to refetch with new vote
         queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
     }, [queryClient, roomKey]);
 
     const handleVisibilityToggle = useCallback((data: any) => {
-        console.log('Visibility toggle received:', data);
         // Invalidate room data to refetch with new visibility state
         queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
     }, [queryClient, roomKey]);
 
     const handleVoteReset = useCallback((data: any) => {
-        console.log('Vote reset received:', data);
         // Clear selected vote and invalidate room data
         setSelectedVote(null);
         queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
     }, [queryClient, roomKey]);
 
     const handleParticipantUpdate = useCallback((data: any) => {
-        console.log('Participant update received:', data);
         // Invalidate room data to refetch with new participants
         queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
     }, [queryClient, roomKey]);
 
     const handleRoomUpdate = useCallback((data: any) => {
-        console.log('Room update received:', data);
         // Invalidate room data to refetch
         queryClient.invalidateQueries({ queryKey: queryKeys.room(roomKey) });
     }, [queryClient, roomKey]);
@@ -110,9 +103,10 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
         },
     });
 
+
+
     const handleVoteClick = (vote: Vote) => {
         setSelectedVote(vote);
-        console.log('Vote selected:', vote);
 
         // Submit the vote to the API
         submitVoteMutation.mutate(vote);
@@ -132,6 +126,27 @@ function DashboardContent({ roomKey, currentUserId }: DashboardProps) {
             }
         }
     }, [roomData, currentUserId]);
+
+    // Handle page unload to notify other users when leaving
+    useEffect(() => {
+        const handleBeforeUnload = () => {
+            // Use sendBeacon for reliable delivery during page unload
+            if (navigator.sendBeacon) {
+                const data = new Blob([JSON.stringify({ userId: currentUserId })], {
+                    type: 'application/json'
+                });
+                navigator.sendBeacon(`/api/room/${roomKey}/leave`, data);
+            }
+        };
+
+        // Add event listeners
+        window.addEventListener('beforeunload', handleBeforeUnload);
+
+        // Cleanup function
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [roomKey, currentUserId]);
 
     const handleShowHideClick = () => {
         toggleVisibilityMutation.mutate();
