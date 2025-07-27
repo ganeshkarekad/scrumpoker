@@ -1,0 +1,289 @@
+{# Cookie Banner Component #}
+<div id="cookieBanner" class="cookie-banner" style="display: none;">
+    <div class="cookie-banner__container">
+        <div class="cookie-banner__content">
+            <div class="cookie-banner__icon">🍪</div>
+            <div class="cookie-banner__text">
+                <h6 class="cookie-banner__title">We use cookies</h6>
+                <p class="cookie-banner__description">
+                    We use cookies to enhance your experience and remember your preferences.
+                    By continuing to use our site, you agree to our use of cookies.
+                </p>
+            </div>
+            <div class="cookie-banner__actions">
+                <button type="button" class="btn btn-outline-light btn-sm cookie-banner__btn" id="cookieDecline">
+                    Decline
+                </button>
+                <button type="button" class="btn btn-light btn-sm cookie-banner__btn" id="cookieAccept">
+                    Accept
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Cookie Banner Styles */
+.cookie-banner {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    right: 2rem;
+    z-index: 9999;
+    animation: slideInUp 0.5s ease-out;
+
+    @media (min-width: 768px) {
+        left: auto;
+        right: 2rem;
+        max-width: 400px;
+    }
+}
+
+.cookie-banner__container {
+    background: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 1rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    overflow: hidden;
+}
+
+.cookie-banner__content {
+    padding: 1.5rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+
+    @media (max-width: 767px) {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+}
+
+.cookie-banner__icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    margin-top: 0.25rem;
+
+    @media (max-width: 767px) {
+        margin-top: 0;
+    }
+}
+
+.cookie-banner__text {
+    flex: 1;
+    color: white;
+}
+
+.cookie-banner__title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.cookie-banner__description {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    margin-bottom: 0;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.cookie-banner__actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-shrink: 0;
+
+    @media (max-width: 767px) {
+        width: 100%;
+        margin-top: 1rem;
+    }
+}
+
+.cookie-banner__btn {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all 0.3s ease;
+    border-width: 1px;
+
+    @media (max-width: 767px) {
+        flex: 1;
+    }
+
+    &:hover {
+        transform: translateY(-1px);
+    }
+
+    &.btn-outline-light {
+        background: transparent;
+        border-color: rgba(255, 255, 255, 0.3);
+        color: rgba(255, 255, 255, 0.9);
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+        }
+    }
+
+    &.btn-light {
+        background: white;
+        border-color: white;
+        color: var(--bs-dark);
+
+        &:hover {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(255, 255, 255, 0.9);
+            color: var(--bs-dark);
+        }
+    }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideOutDown {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(100%);
+    }
+}
+
+.cookie-banner--hiding {
+    animation: slideOutDown 0.3s ease-in forwards;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cookieBanner = document.getElementById('cookieBanner');
+    const acceptBtn = document.getElementById('cookieAccept');
+    const declineBtn = document.getElementById('cookieDecline');
+
+    // Cookie utility functions
+    function setCookie(name, value, days) {
+        const expires = new Date();
+        expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+        document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+    }
+
+    function getCookie(name) {
+        const nameEQ = name + "=";
+        const ca = document.cookie.split(';');
+        for (let i = 0; i < ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+            if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+        }
+        return null;
+    }
+
+    function hideBanner() {
+        cookieBanner.classList.add('cookie-banner--hiding');
+        setTimeout(() => {
+            cookieBanner.style.display = 'none';
+        }, 300);
+    }
+
+    // Check if user has already made a choice
+    const cookieConsent = getCookie('cookie_consent');
+
+    // Only hide banner if user previously ACCEPTED cookies
+    // If they declined, show banner again on new visit (session cookies expire)
+    if (cookieConsent !== 'accepted') {
+        // Show banner after a short delay for better UX
+        setTimeout(() => {
+            cookieBanner.style.display = 'block';
+        }, 1000);
+    }
+
+    // Handle accept button
+    acceptBtn.addEventListener('click', function() {
+        setCookie('cookie_consent', 'accepted', 365); // Store for 1 year
+        hideBanner();
+
+        // Optional: Track acceptance for analytics
+        console.log('Cookie consent: Accepted');
+    });
+
+    // Handle decline button
+    declineBtn.addEventListener('click', function() {
+        // For decline, only store for current session (no expiry = session cookie)
+        // This way the banner will appear again on next visit
+        document.cookie = 'cookie_consent=declined;path=/;SameSite=Lax';
+        hideBanner();
+
+        // Close the tab/window as requested
+        setTimeout(() => {
+            // Try different methods to close the tab
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.close();
+            }
+
+            // If window.close() doesn't work (modern browsers restrict this),
+            // redirect to a goodbye page or show a message
+            setTimeout(() => {
+                document.body.innerHTML = `
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        min-height: 100vh;
+                        background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+                        font-family: 'Inter', sans-serif;
+                        text-align: center;
+                        padding: 2rem;
+                    ">
+                        <div style="
+                            background: rgba(255, 255, 255, 0.95);
+                            backdrop-filter: blur(20px);
+                            border-radius: 1.5rem;
+                            padding: 3rem;
+                            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+                            max-width: 500px;
+                        ">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">👋</div>
+                            <h2 style="color: #0F172A; margin-bottom: 1rem;">Thanks for visiting!</h2>
+                            <p style="color: #64748B; margin-bottom: 2rem;">
+                                We respect your choice regarding cookies.
+                                Feel free to visit us again anytime - you can always change your mind about cookies on your next visit.
+                            </p>
+                            <button onclick="window.close()" style="
+                                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                color: white;
+                                border: none;
+                                padding: 0.75rem 2rem;
+                                border-radius: 0.75rem;
+                                font-weight: 600;
+                                cursor: pointer;
+                                transition: transform 0.3s ease;
+                            " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                                Close Tab
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }, 100);
+        }, 500);
+
+        console.log('Cookie consent: Declined for this session - Will show again on next visit');
+    });
+});
+</script>
