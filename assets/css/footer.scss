@@ -31,6 +31,36 @@
         }
     }
 
+    &__links {
+        .footer-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--bs-light);
+            text-decoration: none;
+            border-radius: var(--bs-border-radius);
+            font-weight: 500;
+            font-size: 0.875rem;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+
+            &:hover {
+                color: var(--bs-light);
+                background: rgba(255, 255, 255, 0.2);
+                transform: translateY(-2px);
+                border-color: rgba(255, 255, 255, 0.3);
+            }
+
+            &:focus {
+                color: var(--bs-light);
+                outline: 2px solid rgba(255, 255, 255, 0.5);
+                outline-offset: 2px;
+            }
+        }
+    }
+
     &__donation {
         .donation-link {
             display: inline-flex;

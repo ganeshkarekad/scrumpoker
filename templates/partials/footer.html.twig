@@ -5,6 +5,12 @@
                 <p>&copy; {{ "now"|date("Y") }} <span class="site-name">{{ constant('App\\Constant\\Site::NAME') }}</span>. All rights reserved.</p>
             </div>
 
+            <div class="footer__links">
+                <a href="{{ path('app_info_terms') }}" class="footer-link">
+                    📋 Terms & Conditions
+                </a>
+            </div>
+
             <div class="footer__donation">
                 <a href="{{ donation_link }}" target="_blank" rel="noopener noreferrer" class="donation-link">
                     <span class="donation-icon">☕</span>
