@@ -164,6 +164,37 @@ function DashboardContent({ roomKey, currentUserId, mercureUrl }: DashboardProps
         }
     };
 
+    // Copy functionality
+    const [copySuccess, setCopySuccess] = useState<string | null>(null);
+
+    const copyToClipboard = async (text: string, type: string) => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setCopySuccess(type);
+            // Clear success message after 2 seconds
+            setTimeout(() => setCopySuccess(null), 2000);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            // Fallback for older browsers
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            setCopySuccess(type);
+            setTimeout(() => setCopySuccess(null), 2000);
+        }
+    };
+
+    const handleCopyRoomKey = () => {
+        copyToClipboard(roomKey, 'room-key');
+    };
+
+    const handleCopyPageUrl = () => {
+        copyToClipboard(window.location.href, 'page-url');
+    };
+
     const renderParticipantLabels = (participant: Participant) => {
         const labels = [];
 
@@ -189,11 +220,20 @@ function DashboardContent({ roomKey, currentUserId, mercureUrl }: DashboardProps
     const renderParticipantVote = (participant: Participant) => {
         // If votes are hidden (based on room state), show "Hidden" for all participants
         if (!roomData?.votesVisible) {
-            return (
-                <span className="status-badge badge bg-warning">
-                    🙈 Hidden
-                </span>
-            );
+            // Show different badge for users who have voted vs haven't voted
+            if (participant.vote) {
+                return (
+                    <span className="status-badge badge bg-info">
+                        🗳️ Voted
+                    </span>
+                );
+            } else {
+                return (
+                    <span className="status-badge badge bg-warning">
+                        🙈 Hidden
+                    </span>
+                );
+            }
         }
 
         // If participant has voted, show their vote
@@ -211,6 +251,14 @@ function DashboardContent({ roomKey, currentUserId, mercureUrl }: DashboardProps
                 ⏳ No Vote
             </span>
         );
+    };
+
+    // Helper function to get voter count
+    const getVoterCount = () => {
+        if (!roomData?.participants) return { voted: 0, total: 0 };
+        const voted = roomData.participants.filter(p => p.vote).length;
+        const total = roomData.participants.length;
+        return { voted, total };
     };
 
     if (votesLoading || roomLoading) {
@@ -322,6 +370,8 @@ function DashboardContent({ roomKey, currentUserId, mercureUrl }: DashboardProps
                     </div>
                 </div>
 
+
+
                 {/* Vote Chart - Only show when votes are visible and there are participants */}
                 {roomData?.votesVisible && roomData?.participants && (
                     <VoteChart
@@ -366,7 +416,16 @@ function DashboardContent({ roomKey, currentUserId, mercureUrl }: DashboardProps
                             <h5 className="mb-1">
                                 👥 Participants ({roomData?.participants?.length || 0})
                             </h5>
-                            <small className="opacity-75">Real-time participant status and votes</small>
+                            <div className="d-flex gap-3 align-items-center">
+                                <small className="opacity-75">Real-time participant status and votes</small>
+                                {roomData?.participants && (
+                                    <span className={`status-badge badge ${
+                                        !roomData.votesVisible ? 'bg-info' : 'bg-secondary'
+                                    }`}>
+                                        🗳️ {getVoterCount().voted} of {getVoterCount().total} voted
+                                    </span>
+                                )}
+                            </div>
                         </div>
                         <div className="d-flex align-items-center">
                             <span className={`status-badge badge me-2 ${
@@ -426,6 +485,31 @@ function DashboardContent({ roomKey, currentUserId, mercureUrl }: DashboardProps
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* Floating Share Button */}
+            <div className="floating-share-container">
+                <div className="floating-share-menu">
+                    <button
+                        className="floating-share-option"
+                        onClick={handleCopyRoomKey}
+                        title="Copy Room Key"
+                        disabled={submitVoteMutation.isPending || resetVotesMutation.isPending || toggleVisibilityMutation.isPending}
+                    >
+                        {copySuccess === 'room-key' ? '✅' : '🔑'}
+                    </button>
+                    <button
+                        className="floating-share-option"
+                        onClick={handleCopyPageUrl}
+                        title="Copy Page URL"
+                        disabled={submitVoteMutation.isPending || resetVotesMutation.isPending || toggleVisibilityMutation.isPending}
+                    >
+                        {copySuccess === 'page-url' ? '✅' : '🔗'}
+                    </button>
+                </div>
+                <button className="floating-share-toggle" title="Share Room">
+                    📤
+                </button>
             </div>
         </div>
     );
